@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Home Page </title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+
+</head>
+<body>
+
+	<br><br><br>
+
+	<!-- HEADER -->
+	<h1 class="text-center"> 🚴🏻‍♂️ jFit 🏋🏻 </h1>
+
+	<br><br><br>
+
+	<!-- Body First Look -->
+	<div class="container">
+	  <div class="row">
+
+	  	<!-- Exercise Form -->
+		<div class="col-4">
+		  	<h3><p class="text-center">Save Exercises</p></h3>
+			<form action="#" method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				{{ exercise_form.as_p }}
+				Note: Valid datetime format is YYYY-MM-DD 📆
+				<br><br>
+				<input class="btn btn-primary" type="submit" name="exercise_form" value="Save"> 
+			</form>
+		</div>
+
+		<!-- Goal Form -->
+		<div class="col-4">
+			<h3><p class="text-center">Save Goal</p></h3>
+			<form action="#" method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				{{ goal_form.as_p }}
+				<input class="btn btn-primary" type="submit" name="goal_form" value="Save">
+			</form>
+		</div>
+
+		<!-- Chart View -->
+		<div class="col-4">
+
+			<!-- Chart View Selection Input-->
+			<div>
+				<form style="display:inline" action="" method="get" enctype="multipart/form-data">
+					<label for="selected_date">Select date:</label>
+					<input type="date" id="selected_date" name="selected_date"
+						value={{selected_date}}>
+					<input type="submit" class="btn btn-primary" value="Update"> 
+				</form>
+			</div>
+
+			<br>
+
+			<!-- Chart.js chart-->
+			<canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+			<script>
+				var xValues = [];
+				var yValues = [];
+				{% for key, value in datewise_exercises.items %}
+					xValues.push("{{key}}");
+					yValues.push("{{value}}");
+				{% endfor %}	
+
+				var barColors = ["red", "green","blue","orange","brown"];
+
+				new Chart("myChart", {
+				  type: "bar",
+				  data: {
+					labels: xValues,
+					datasets: [{
+					  backgroundColor: barColors,
+					  data: yValues
+					}]
+				  },
+				  options: {
+					legend: {display: false},
+					title: {
+					  display: false,
+					  text: "Exercises Completed on Date: {{selected_date}}"
+					},
+					scales: {
+						yAxes: [
+							{
+								scaleLabel: {
+									display: true,
+									labelString: 'Time (Minutes)'
+								},
+								ticks: {
+									beginAtZero: true   // minimum value will be 0.
+								}
+							}
+						],
+						xAxes: [
+							{
+								scaleLabel: {
+									display: false,
+									labelString: 'Exercise Types'
+								}
+							}
+						]
+				}
+				  }
+				});
+			</script>
+
+			<!-- Chart Label -->
+			<div class="text-center">Completed exercises on: {{selected_date}}</div>
+		</div>
+	  </div>
+	</div>
+
+	<br><br><br>
+
+	<!-- Progress View -->
+	<div class="row text-center">
+		<div class="col">
+			<form action="" method="get" enctype="multipart/form-data">
+			  <label for="selected_goal">Select Goal Type:</label>
+			  	<select name="selected_goal" id="selected_goal">
+			  		{% for goal in goal_types %}
+			  			{% if forloop.counter == selected_goal %}
+				  			<option value={{forloop.counter}} selected>{{goal}}</option>
+			  			{% else %}
+			  				<option value={{forloop.counter}}>{{goal}}</option>
+			  			{% endif %}
+				  	{% endfor %}
+			    </select>
+			  <input type="submit" class="btn btn-primary" value="Update">
+			</form>
+			Exercise name: {{exercise_name}} <br>
+			Progress %: {{progress_perc}}
+		</div>
+	</div>
+
+	<!-- Alert View -->
+	{% if alert_msg %}
+		<br><br>
+		<div class="alert alert-primary text-center" role="alert" style="width:40%;">
+			  {{ alert_msg }}
+		</div>
+	{% endif %}
+
+</body>
+</html>
